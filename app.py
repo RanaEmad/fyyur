@@ -630,6 +630,17 @@ def shows():
     "artist_image_link": "https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80",
     "start_time": "2035-04-15T20:00:00.000Z"
   }]
+  all_shows=db.session.query(Show, Venue, Artist).join(Venue, Venue.id==Show.venue_id).join(Artist, Artist.id==Show.artist_id).all()
+  data=[]
+  for show,venue,artist in all_shows:
+    data.append({
+    "venue_id": venue.id,
+    "venue_name": venue.name,
+    "artist_id": artist.id,
+    "artist_name": artist.name,
+    "artist_image_link": artist.image_link,
+    "start_time": show.start_time.strftime("%Y-%m-%d %H:%M:%S")
+  })
   return render_template('pages/shows.html', shows=data)
 
 @app.route('/shows/create')
