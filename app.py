@@ -334,6 +334,8 @@ def artists():
     "id": 6,
     "name": "The Wild Sax Band",
   }]
+  artists=Artist.query.all()
+  data=artists
   return render_template('pages/artists.html', artists=data)
 
 @app.route('/artists/search', methods=['POST'])
