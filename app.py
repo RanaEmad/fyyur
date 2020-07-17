@@ -16,6 +16,7 @@ from flask_migrate import Migrate
 from datetime import datetime
 from pprint import pprint
 from sqlalchemy import text
+import json
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -44,6 +45,7 @@ class Venue(db.Model):
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
+    genres = db.Column(db.String(500))
 
   # TODO: implement any missing fields, as a database migration using Flask-Migrate
   #   {
@@ -169,10 +171,12 @@ def venues():
   for venue in venues:
     if not (venue.city in grouped.keys()):
       grouped[venue.city]={}
+      grouped[venue.city][venue.state]=[]
     if venue.state in grouped[venue.city].keys():
       grouped[venue.city][venue.state].append(venue)
-    else:
-      grouped[venue.city]={venue.state:[venue]}  
+    else: 
+      grouped[venue.city][venue.state]=[]  
+      grouped[venue.city][venue.state].append(venue)  
   data=[]    
   for city in grouped:
     for state in grouped[city]:
@@ -280,7 +284,7 @@ def show_venue(venue_id):
     "past_shows_count": 1,
     "upcoming_shows_count": 1,
   }
-  data = list(filter(lambda d: d['id'] == venue_id, [data1, data2, data3]))[0]
+  # data = list(filter(lambda d: d['id'] == venue_id, [data1, data2, data3]))[0]
   data= Venue.query.filter_by(id=venue_id).one()
 
   upcoming_shows= db.session.query(Show,Artist).filter_by(venue_id=venue_id).join(Artist).filter(Show.start_time > datetime.now()).filter(Artist.id==Show.artist_id).all()
@@ -322,8 +326,10 @@ def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
   error= False
   try:
-    venue= Venue(name=request.form['name'],city=request.form['city'],state=request.form['state'],address=request.form['address'],phone=request.form['phone'],facebook_link=request.form['facebook_link'])
-    # venue= Venue(name=request.form['name'],city=request.form['city'],state=request.form['state'],address=request.form['address'],phone=request.form['phone'],image_link=request.form['image_link'],facebook_link=request.form['facebook_link'])
+    seeking_talent=True
+    if request.form['seeking_talent']=='No':
+      seeking_talent=False
+    venue= Venue(name=request.form['name'],city=request.form['city'],state=request.form['state'],address=request.form['address'],phone=request.form['phone'],facebook_link=request.form['facebook_link'],image_link=request.form['image_link'],seeking_talent=seeking_talent,seeking_description=request.form['seeking_description'],website=request.form['website'],genres=(request.form.getlist('genres')))
     db.session.add(venue)
     db.session.commit()
   except:
@@ -338,7 +344,7 @@ def create_venue_submission():
   # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
   if error:
-    flash('An error occurred. Venue ' + data.name + ' could not be listed.')
+    flash('An error occurred. Venue ' + request.form["name"] + ' could not be listed.')
   else:
     # on successful db insert, flash success
     flash('Venue ' + request.form['name'] + ' was successfully listed!')
