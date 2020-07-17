@@ -286,6 +286,7 @@ def show_venue(venue_id):
   }
   # data = list(filter(lambda d: d['id'] == venue_id, [data1, data2, data3]))[0]
   data= Venue.query.filter_by(id=venue_id).one()
+  data.genres= json.loads(data.genres)
 
   upcoming_shows= db.session.query(Show,Artist).filter_by(venue_id=venue_id).join(Artist).filter(Show.start_time > datetime.now()).filter(Artist.id==Show.artist_id).all()
   upcoming_shows_arr=[]
@@ -329,7 +330,7 @@ def create_venue_submission():
     seeking_talent=True
     if request.form['seeking_talent']=='No':
       seeking_talent=False
-    venue= Venue(name=request.form['name'],city=request.form['city'],state=request.form['state'],address=request.form['address'],phone=request.form['phone'],facebook_link=request.form['facebook_link'],image_link=request.form['image_link'],seeking_talent=seeking_talent,seeking_description=request.form['seeking_description'],website=request.form['website'],genres=(request.form.getlist('genres')))
+    venue= Venue(name=request.form['name'],city=request.form['city'],state=request.form['state'],address=request.form['address'],phone=request.form['phone'],facebook_link=request.form['facebook_link'],image_link=request.form['image_link'],seeking_talent=seeking_talent,seeking_description=request.form['seeking_description'],website=request.form['website'],genres=json.dumps(request.form.getlist('genres')))
     db.session.add(venue)
     db.session.commit()
   except:
