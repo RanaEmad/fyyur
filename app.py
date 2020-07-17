@@ -161,6 +161,19 @@ def venues():
       "num_upcoming_shows": 0,
     }]
   }]
+  venues=Venue.query.all()
+  grouped={}
+  for venue in venues:
+    if not (venue.city in grouped.keys()):
+      grouped[venue.city]={}
+    if venue.state in grouped[venue.city].keys():
+      grouped[venue.city][venue.state].append(venue)
+    else:
+      grouped[venue.city]={venue.state:[venue]}  
+  data=[]    
+  for city in grouped:
+    for state in grouped[city]:
+      data.append({"city":city,"state":state, "venues": grouped[city][state]})
   return render_template('pages/venues.html', areas=data);
 
 @app.route('/venues/search', methods=['POST'])
