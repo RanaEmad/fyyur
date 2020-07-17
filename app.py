@@ -357,6 +357,11 @@ def search_artists():
       "num_upcoming_shows": 0,
     }]
   }
+  artists= Artist.query.filter(Artist.name.ilike('%'+request.form["search_term"]+'%')).all()
+  response={
+    "count": len(artists),
+    "data": artists
+  }
   return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
 
 @app.route('/artists/<int:artist_id>')
