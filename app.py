@@ -501,7 +501,7 @@ def show_artist(artist_id):
   data.past_shows=past_shows_arr
   data.past_shows_count=len(past_shows_arr)
 
-  data.genres=[]
+  data.genres=json.loads(data.genres)
   return render_template('pages/show_artist.html', artist=data)
 
 #  Update
