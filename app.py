@@ -189,6 +189,11 @@ def search_venues():
       "num_upcoming_shows": 0,
     }]
   }
+  venues= Venue.query.filter(Venue.name.ilike('%'+request.form["search_term"]+'%')).all()
+  response={
+    "count": len(venues),
+    "data": venues
+  }
   return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
 
 @app.route('/venues/<int:venue_id>')
