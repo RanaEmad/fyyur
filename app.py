@@ -13,6 +13,9 @@ from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
 from flask_migrate import Migrate
+from datetime import datetime
+from pprint import pprint
+from sqlalchemy import text
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -279,6 +282,31 @@ def show_venue(venue_id):
   }
   data = list(filter(lambda d: d['id'] == venue_id, [data1, data2, data3]))[0]
   data= Venue.query.filter_by(id=venue_id).one()
+
+  upcoming_shows= db.session.query(Show,Artist).filter_by(venue_id=venue_id).join(Artist).filter(Show.start_time > datetime.now()).filter(Artist.id==Show.artist_id).all()
+  upcoming_shows_arr=[]
+  for show,artist in upcoming_shows:
+    upcoming_shows_arr.append({
+      "artist_id": artist.id,
+      "artist_name": artist.name,
+      "artist_image_link": artist.image_link,
+      "start_time": show.start_time.strftime("%Y-%m-%d %H:%M:%S")
+    })
+  data.upcoming_shows=upcoming_shows_arr
+  data.upcoming_shows_count=len(upcoming_shows_arr)
+
+  past_shows= db.session.query(Show,Artist).filter_by(venue_id=venue_id).join(Artist).filter(Show.start_time <= datetime.now()).filter(Artist.id==Show.artist_id).all()
+  past_shows_arr=[]
+  for show,artist in past_shows:
+    past_shows_arr.append({
+      "artist_id": artist.id,
+      "artist_name": artist.name,
+      "artist_image_link": artist.image_link,
+      "start_time": show.start_time.strftime("%Y-%m-%d %H:%M:%S")
+    })
+  data.past_shows=past_shows_arr
+  data.past_shows_count=len(past_shows_arr)
+
   return render_template('pages/show_venue.html', venue=data)
 
 #  Create Venue
