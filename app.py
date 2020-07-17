@@ -469,6 +469,31 @@ def show_artist(artist_id):
   }
   # data = list(filter(lambda d: d['id'] == artist_id, [data1, data2, data3]))[0]
   data= Artist.query.filter_by(id=artist_id).one()
+
+  upcoming_shows= db.session.query(Show,Venue).filter_by(artist_id=artist_id).join(Venue).filter(Show.start_time > datetime.now()).filter(Venue.id==Show.venue_id).all()
+  upcoming_shows_arr=[]
+  for show,venue in upcoming_shows:
+    upcoming_shows_arr.append({
+      "venue_id": venue.id,
+      "venue_name": venue.name,
+      "venue_image_link": venue.image_link,
+      "start_time": show.start_time.strftime("%Y-%m-%d %H:%M:%S")
+    })
+  data.upcoming_shows=upcoming_shows_arr
+  data.upcoming_shows_count=len(upcoming_shows_arr)
+
+  past_shows= db.session.query(Show,Venue).filter_by(artist_id=artist_id).join(Venue).filter(Show.start_time <= datetime.now()).filter(Venue.id==Show.venue_id).all()
+  past_shows_arr=[]
+  for show,venue in past_shows:
+    past_shows_arr.append({
+      "venue_id": venue.id,
+      "venue_name": venue.name,
+      "venue_image_link": venue.image_link,
+      "start_time": show.start_time.strftime("%Y-%m-%d %H:%M:%S")
+    })
+  data.past_shows=past_shows_arr
+  data.past_shows_count=len(past_shows_arr)
+
   data.genres=[]
   return render_template('pages/show_artist.html', artist=data)
 
