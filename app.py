@@ -273,11 +273,35 @@ def edit_artist_submission(artist_id):
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
   venue= Venue.query.filter_by(id=venue_id).one()
-  form = VenueForm(name=venue.name,city=venue.city,state=venue.state,address=venue.address,phone=venue.phone,genres=json.loads(venue.genres),facebook_link=venue.facebook_link,image_link=venue.image_link,seeking_talent=venue.seeking_talent,seeking_description=venue.seeking_description,website=venue.website)
+  seeking_talent="No"
+  if venue.seeking_talent:
+    seeking_talent="Yes"
+  form = VenueForm(name=venue.name,city=venue.city,state=venue.state,address=venue.address,phone=venue.phone,genres=json.loads(venue.genres),facebook_link=venue.facebook_link,image_link=venue.image_link,seeking_talent=seeking_talent,seeking_description=venue.seeking_description,website=venue.website)
   return render_template('forms/edit_venue.html', form=form, venue=venue)
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
+  try:
+    venue= Venue.query.filter_by(id=venue_id).one()
+    venue.name=request.form["name"]
+    venue.city=request.form["city"]
+    venue.state=request.form["state"]
+    venue.address=request.form["address"]
+    venue.phone=request.form["phone"]
+    venue.genres=json.dumps(request.form.getlist("genres"))
+    venue.facebook_link=request.form["facebook_link"]
+    venue.image_link=request.form["image_link"]
+    seeking_talent=False
+    if request.form["seeking_talent"]=="Yes":
+      seeking_talent=True
+    venue.seeking_talent=seeking_talent
+    venue.seeking_description=request.form["seeking_description"]
+    venue.website=request.form["website"]
+    db.session.commit()
+  except:
+    db.session.rollback()
+  finally:
+    db.session.close()
   return redirect(url_for('show_venue', venue_id=venue_id))
 
 #  Create Artist
