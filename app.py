@@ -259,21 +259,11 @@ def show_artist(artist_id):
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
-  form = ArtistForm()
-  artist={
-    "id": 4,
-    "name": "Guns N Petals",
-    "genres": ["Rock n Roll"],
-    "city": "San Francisco",
-    "state": "CA",
-    "phone": "326-123-5000",
-    "website": "https://www.gunsnpetalsband.com",
-    "facebook_link": "https://www.facebook.com/GunsNPetals",
-    "seeking_venue": True,
-    "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
-    "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
-  }
   artist= Artist.query.filter_by(id=artist_id).one()
+  seeking_venue="No"
+  if artist.seeking_venue:
+    seeking_venue="Yes"
+  form = ArtistForm(name=artist.name, city=artist.city, state=artist.state, phone = artist.phone, genres=json.loads(artist.genres),facebook_link=artist.facebook_link,image_link=artist.image_link, seeking_venue=seeking_venue,seeking_description=artist.seeking_description,website=artist.website)
   return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
