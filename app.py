@@ -268,6 +268,26 @@ def edit_artist(artist_id):
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
+  try:
+    artist= Artist.query.filter_by(id=artist_id).one()
+    artist.name=request.form["name"]
+    artist.city=request.form["city"]
+    artist.state=request.form["state"]
+    artist.phone=request.form["phone"]
+    artist.genres=json.dumps(request.form.getlist("genres"))
+    artist.facebook_link=request.form["facebook_link"]
+    artist.image_link=request.form["image_link"]
+    seeking_venue=False
+    if request.form["seeking_venue"]=="Yes":
+      seeking_venue=True
+    artist.seeking_venue=seeking_venue
+    artist.seeking_description=request.form["seeking_description"]
+    artist.website=request.form["website"]
+    db.session.commit()
+  except:
+    db.session.rollback()
+  finally:
+    db.session.close()
   return redirect(url_for('show_artist', artist_id=artist_id))
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
